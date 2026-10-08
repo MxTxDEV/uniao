@@ -30,6 +30,9 @@ npm test && npm run lint && npm run typecheck
 | Admin | admin@uniaogrifes.com.br |
 | Vendedor | joao@uniaogrifes.com.br · maria@… · pedro@… |
 
+## Deploy com Docker (Coolify, etc.)
+O `Dockerfile` faz o build e, ao iniciar, roda `prisma migrate deploy`. Configure: Build Pack **Dockerfile**, porta **3000**, variáveis `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`. Com `RUN_SEED=true` o container também cria os dados de demonstração (apenas se o banco estiver vazio; login `admin@uniaogrifes.com.br` / `uniao123`).
+
 ## Deploy (Vercel + Neon)
 1. Crie um projeto no Neon; copie a string *pooled* (`DATABASE_URL`) e a *direct* (`DIRECT_URL`).
 2. Aplique as migrations uma vez: `DATABASE_URL=<direct> DIRECT_URL=<direct> npx prisma migrate deploy` (opcional: `npm run db:seed`).
