@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { cancelSale, createSale, getSale, listSales } from "@/server/sales";
-import { makeTenant, resetDb, rid, saleInput } from "./helpers";
+import { makeTenant, resetDb, saleInput } from "./helpers";
 
 beforeEach(resetDb);
 

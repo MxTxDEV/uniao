@@ -10,7 +10,6 @@ export function parse<S extends z.ZodTypeAny>(schema: S, input: unknown): z.infe
 }
 
 // Remove caracteres de controle e espaços nas pontas (sanitização de texto livre).
-// eslint-disable-next-line no-control-regex
 const CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g;
 export const text = (max: number, label: string) =>
   z

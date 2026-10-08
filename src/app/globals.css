@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f5f2;
+  --foreground: #0c0c0d;
+  --card: #ffffff;
+  --muted: #f0eee9;
+  --muted-foreground: #6c6c72;
+  --border: #e8e6e0;
+  --primary: #0c0c0d;
+  --primary-foreground: #ffffff;
+  --accent: #a8864f;
+  --success: #15803d;
+  --success-soft: #e8f5ec;
+  --danger: #b91c1c;
+  --danger-soft: #fdeceb;
+  --warning-soft: #fdf3dc;
+  --warning: #92610a;
+  --ring: #0c0c0d;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --radius-card: 1.25rem;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+* {
+  border-color: var(--border);
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+button:not(:disabled),
+[role="button"] {
+  cursor: pointer;
+}
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-pop {
+  animation: pop-in 0.18s ease-out;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade {
+  animation: fade-in 0.15s ease-out;
+}
+
+/* Impressão do comprovante: só o conteúdo marcado com .print-area */
+@media print {
+  body {
+    background: #fff;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+    margin: 0 auto;
+    max-width: 80mm;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "@/lib/db";
 import { addDays, parseYmdBR, resolvePeriod, startOfDayBR, ymdBR } from "@/lib/dates";
 import { formatBRL, parseMoney } from "@/lib/money";
@@ -134,5 +134,26 @@ describe("dashboard e relatórios", () => {
     expect(db_b.sellers).toHaveLength(0);
     expect(db_b.recent).toHaveLength(0);
     expect((await getReport(b.adminCtx, resolvePeriod("hoje"))).products).toHaveLength(0);
+  });
+});
+
+import { signToken, verifyToken } from "@/lib/token";
+
+describe("token de sessão", () => {
+  it("assina e verifica; rejeita adulteração, assinatura inválida e expirado", async () => {
+    const t = await signToken({ uid: "u1", tid: "t1" });
+    expect(await verifyToken(t)).toEqual({ uid: "u1", tid: "t1" });
+    const [h, b, s] = t.split(".");
+    const forged = Buffer.from(JSON.stringify({ sub: "u1", tid: "OUTRA", exp: 9999999999 })).toString("base64url");
+    expect(await verifyToken(`${h}.${forged}.${s}`)).toBeNull();
+    expect(await verifyToken(`${h}.${b}.${s.slice(0, -2)}AA`)).toBeNull();
+    expect(await verifyToken("lixo")).toBeNull();
+    expect(await verifyToken(undefined)).toBeNull();
+    const none = Buffer.from(JSON.stringify({ alg: "none" })).toString("base64url");
+    expect(await verifyToken(`${none}.${b}.`)).toBeNull();
+    vi.useFakeTimers();
+    vi.setSystemTime(Date.now() + 8 * 24 * 3600 * 1000);
+    expect(await verifyToken(t)).toBeNull();
+    vi.useRealTimers();
   });
 });

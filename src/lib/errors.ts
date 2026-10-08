@@ -19,7 +19,7 @@ export class AppError extends Error {
 
 export type ActionResult<T = undefined> =
   | { ok: true; data: T }
-  | { ok: false; error: string };
+  | { ok: false; error: string; code?: ErrorCode };
 
 export function toErrorMessage(e: unknown): string {
   if (e instanceof AppError) return e.message;
@@ -34,6 +34,6 @@ export async function run<T>(fn: () => Promise<T>): Promise<ActionResult<T>> {
   } catch (e) {
     // redirect()/notFound() do Next lançam erros especiais que não devem ser engolidos
     if (e && typeof e === "object" && "digest" in e) throw e;
-    return { ok: false, error: toErrorMessage(e) };
+    return { ok: false, error: toErrorMessage(e), code: e instanceof AppError ? e.code : undefined };
   }
 }
