@@ -6,7 +6,7 @@ import { signToken } from "@/lib/token";
 import { toErrorMessage } from "@/lib/errors";
 import { audit } from "@/server/audit";
 
-export async function loginAction(_prev: { error?: string } | undefined, formData: FormData): Promise<{ error?: string }> {
+export async function loginAction(_prev: { error?: string; email?: string } | undefined, formData: FormData): Promise<{ error?: string; email?: string }> {
   try {
     const { userId, tenantId } = await authenticate({
       email: String(formData.get("email") ?? ""),
@@ -14,7 +14,7 @@ export async function loginAction(_prev: { error?: string } | undefined, formDat
     });
     await setSessionCookie(await signToken({ uid: userId, tid: tenantId }));
   } catch (e) {
-    return { error: toErrorMessage(e) };
+    return { error: toErrorMessage(e), email: String(formData.get("email") ?? "") };
   }
   redirect("/");
 }

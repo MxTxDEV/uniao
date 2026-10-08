@@ -397,7 +397,7 @@ export function PosScreen({ products, sellers, currentUserId, canPickSeller, set
       {cart.length > 0 && (
         <a
           href="#carrinho"
-          className="no-print animate-pop fixed inset-x-3 bottom-[4.9rem] z-20 flex items-center justify-between rounded-2xl bg-primary px-5 py-3.5 text-primary-foreground shadow-xl md:hidden"
+          className="no-print animate-pop fixed inset-x-3 bottom-[4.9rem] z-20 flex items-center justify-between rounded-2xl bg-primary px-5 py-3.5 text-primary-foreground shadow-xl md:bottom-6 md:left-[calc(76px+1.5rem)] md:right-6 lg:hidden"
         >
           <span className="text-sm font-semibold">{itemCount} {itemCount > 1 ? "itens" : "item"}</span>
           <span className="tabular text-lg font-extrabold">{formatBRL(centsToValue(Math.max(totalCents, 0)))}</span>
@@ -487,7 +487,7 @@ function FinishedDialog({ receipt, store, onNew }: { receipt: SaleReceipt | null
 
   return (
     <Dialog open={!!receipt} onOpenChange={(o) => !o && onNew()}>
-      <DialogContent title="Venda finalizada" hideClose className="max-w-md text-center" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent title="Venda finalizada" hideClose centered className="max-w-md text-center" onOpenAutoFocus={(e) => e.preventDefault()}>
         {receipt && (
           <div>
             <div className="mx-auto -mt-2 mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success-soft text-success">

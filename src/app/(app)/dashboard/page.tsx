@@ -117,12 +117,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               {d.recent.map((r) => (
                 <li key={r.id}>
                   <Link href={`/vendas/${r.id}`} className="flex items-center gap-3 px-5 py-3.5 transition hover:bg-muted/50">
-                    <span className="tabular w-20 font-semibold">{saleNumber(r.number)}</span>
-                    <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-                      {r.seller.name} · {PAYMENT_LABEL[r.paymentMethod]} · <span className="tabular">{formatDateTime(r.createdAt)}</span>
+                    <span className="min-w-0 flex-1 sm:flex sm:items-center sm:gap-3">
+                      <span className="tabular block font-semibold sm:w-20">{saleNumber(r.number)}</span>
+                      <span className="block truncate text-sm text-muted-foreground">
+                        {r.seller.name} · {PAYMENT_LABEL[r.paymentMethod]} · <span className="tabular">{formatDateTime(r.createdAt)}</span>
+                      </span>
                     </span>
-                    <StatusBadge status={r.status} />
-                    <span className={cn("tabular w-28 text-right font-bold", r.status === "CANCELED" && "text-muted-foreground line-through")}>{formatBRL(r.total)}</span>
+                    <span className="hidden sm:inline"><StatusBadge status={r.status} /></span>
+                    <span className={cn("tabular text-right font-bold sm:w-28", r.status === "CANCELED" && "text-muted-foreground line-through")}>{formatBRL(r.total)}</span>
                   </Link>
                 </li>
               ))}

@@ -12,7 +12,7 @@ export function LoginForm() {
     <Card className="p-6">
       <form action={action} className="space-y-4">
         <Field label="E-mail" htmlFor="email">
-          <Input id="email" name="email" type="email" autoComplete="username" autoFocus required placeholder="voce@loja.com" />
+          <Input id="email" name="email" type="email" defaultValue={state?.email ?? ""} autoComplete="username" autoFocus required placeholder="voce@loja.com" />
         </Field>
         <Field label="Senha" htmlFor="password">
           <Input id="password" name="password" type="password" autoComplete="current-password" required placeholder="••••••••" />
