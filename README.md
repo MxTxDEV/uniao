@@ -36,6 +36,12 @@ npm test && npm run lint && npm run typecheck
 3. Importe o repositório na Vercel e defina `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`.
 4. Deploy. O `build` já roda `prisma generate`. Para migrar a cada deploy, use Build Command `prisma migrate deploy && next build`.
 
+### Produção: criar a loja e o admin (sem dados fictícios)
+```bash
+STORE_NAME="União Grifes" ADMIN_EMAIL=dono@loja.com ADMIN_PASSWORD='senha-forte-123' npm run admin:create
+```
+(rode apontando `DATABASE_URL` para o banco de produção; no Coolify, pelo terminal do container). Os usuários do seed só existem se você rodar `npm run db:seed`.
+
 ## Rotas
 `/login` · `/dashboard` · `/nova-venda` (F2) · `/vendas` · `/vendas/[id]` · `/produtos` · `/caixa` · `/funcionarios` · `/relatorios` · `/configuracoes` · `GET /api/relatorios/csv?tipo=vendas|produtos&periodo=…` (admin)
 

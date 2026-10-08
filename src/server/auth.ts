@@ -1,6 +1,6 @@
 import "server-only";
 import { cache } from "react";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { SESSION_COOKIE, SESSION_MAX_AGE, verifyToken } from "@/lib/token";
@@ -49,9 +49,12 @@ export async function requireCtx(): Promise<SessionUser> {
 
 export async function setSessionCookie(token: string) {
   const store = await cookies();
+  // Secure só quando a requisição chegou por HTTPS (atrás de proxy: x-forwarded-proto).
+  // Em HTTP puro um cookie Secure seria descartado pelo navegador e o login "não pegaria".
+  const proto = (await headers()).get("x-forwarded-proto")?.split(",")[0].trim();
   store.set(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: proto === "https",
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_MAX_AGE,
