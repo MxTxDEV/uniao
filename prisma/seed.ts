@@ -47,7 +47,7 @@ async function main() {
     { name: "Tênis Adidas", category: "Tênis", price: "279.90" },
     { name: "Boné", category: "Bonés", price: "79.90" },
   ];
-  const products = await Promise.all(productData.map((p) => db.product.create({ data: { ...p, price: D(p.price), tenantId: tenant.id } })));
+  const products = await Promise.all(productData.map((p) => db.product.create({ data: { ...p, price: D(p.price), stock: 30, tenantId: tenant.id } })));
 
   const sellers = [joao, maria, pedro, admin];
   const sellerWeights = [0.34, 0.3, 0.26, 0.1];

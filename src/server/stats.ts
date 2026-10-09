@@ -100,7 +100,7 @@ export async function getDashboard(ctx: Ctx, periodKey?: string, now: Date = new
 
 export async function getReport(ctx: Ctx, period: Period) {
   assertAdmin(ctx);
-  const [summary, canceled, payments, sellers, products] = await Promise.all([
+  const [summary, canceled, payments, sellers, products, expenses] = await Promise.all([
     totals(ctx.tenantId, period.start, period.end),
     db.sale.aggregate({
       where: { tenantId: ctx.tenantId, status: "CANCELED", createdAt: { gte: period.start, lt: period.end } },
@@ -110,8 +110,10 @@ export async function getReport(ctx: Ctx, period: Period) {
     revenueByPayment(ctx.tenantId, period.start, period.end),
     revenueBySeller(ctx.tenantId, period.start, period.end),
     topProducts(ctx.tenantId, period.start, period.end, 10),
+    db.expense.aggregate({ where: { tenantId: ctx.tenantId, createdAt: { gte: period.start, lt: period.end } }, _sum: { amount: true }, _count: true }),
   ]);
-  return { summary, canceledCount: canceled._count, canceledTotal: canceled._sum.total ?? new Decimal(0), payments, sellers, products };
+  const expensesTotal = expenses._sum.amount ?? new Decimal(0);
+  return { expensesTotal, expensesCount: expenses._count, result: summary.revenue.minus(expensesTotal), summary, canceledCount: canceled._count, canceledTotal: canceled._sum.total ?? new Decimal(0), payments, sellers, products };
 }
 
 export async function salesForExport(ctx: Ctx, period: Period) {

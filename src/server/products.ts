@@ -14,9 +14,10 @@ export interface ProductDTO {
   sku: string | null;
   imageUrl: string | null;
   active: boolean;
+  stock: number;
 }
 
-const toDTO = (p: { id: string; name: string; category: string; price: import("@prisma/client").Prisma.Decimal; sku: string | null; imageUrl: string | null; active: boolean }): ProductDTO => ({
+const toDTO = (p: { id: string; name: string; category: string; price: import("@prisma/client").Prisma.Decimal; sku: string | null; imageUrl: string | null; active: boolean; stock: number }): ProductDTO => ({
   id: p.id,
   name: p.name,
   category: p.category,
@@ -24,6 +25,7 @@ const toDTO = (p: { id: string; name: string; category: string; price: import("@
   sku: p.sku,
   imageUrl: p.imageUrl,
   active: p.active,
+  stock: p.stock,
 });
 
 /** Produtos ativos para o PDV (qualquer perfil da loja). */

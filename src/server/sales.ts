@@ -183,6 +183,12 @@ export async function createSale(ctx: Ctx, input: unknown): Promise<SaleReceipt>
         },
         include: receiptInclude,
       });
+      // Baixa de estoque dos produtos cadastrados (pode ficar negativo: nunca bloqueia a venda).
+      const sold = new Map<string, number>();
+      for (const l of lines) if (l.productId) sold.set(l.productId, (sold.get(l.productId) ?? 0) + l.quantity);
+      for (const [productId, q] of sold) {
+        await tx.product.updateMany({ where: { id: productId, tenantId: ctx.tenantId }, data: { stock: { decrement: q } } });
+      }
       await audit(
         {
           tenantId: ctx.tenantId,
@@ -245,6 +251,11 @@ export async function cancelSale(ctx: Ctx, input: unknown): Promise<void> {
       data: { status: "CANCELED", canceledAt: new Date(), canceledById: ctx.userId, cancelReason: reason },
     });
     if (r.count === 0) throw new AppError("CONFLICT", "Esta venda já foi cancelada.");
+    // Cancelamento devolve ao estoque os produtos cadastrados.
+    const items = await tx.saleItem.findMany({ where: { saleId: id, tenantId: ctx.tenantId, productId: { not: null } }, select: { productId: true, quantity: true } });
+    for (const it of items) {
+      await tx.product.updateMany({ where: { id: it.productId!, tenantId: ctx.tenantId }, data: { stock: { increment: it.quantity } } });
+    }
     await audit(
       { tenantId: ctx.tenantId, userId: ctx.userId, action: "SALE_CANCEL", entity: "Sale", entityId: id, meta: { number: sale.number, total: dec(sale.total), reason } },
       tx,

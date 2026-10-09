@@ -58,8 +58,11 @@ Atalhos: **F2** nova venda · **Ctrl+K** buscar produto · **Enter** adiciona o 
 - Toda consulta/alteração filtra por `tenantId` (inclusive busca por ID); autorização por perfil nos serviços (`src/server/*`), não só na UI. Testes de integração cobrem isolamento e permissões.
 - Preço de produto cadastrado vem do banco; total recalculado no servidor. Venda nunca é apagada (só `CANCELED`). Log de auditoria das ações críticas. Limite de tentativas de login. Headers de segurança.
 
+## Estoque simples (adicionado a pedido do cliente)
+Menu **Estoque**: lança uma entrada com produtos + quantidades, valor total pago e observações. Soma a quantidade de cada produto e registra o valor como **despesa** (aparece em Relatórios: Despesas e Faturamento − despesas). Vendas de produtos cadastrados baixam o estoque (vendas avulsas não) e o cancelamento devolve; o estoque pode ficar negativo e **nunca bloqueia** uma venda.
+
 ## Fora do MVP (de propósito)
-Estoque, compras, fornecedores, contas a pagar/receber, CRM, nota fiscal, logística, marketplace, inventário.
+Inventário completo, compras, fornecedores, contas a pagar/receber, CRM, nota fiscal, logística, marketplace, inventário.
 
 ## FUTURAS MELHORIAS (não implementadas)
 - Cadastro/auto-cadastro de novas lojas (hoje via seed/SQL) e recuperação de senha por e-mail.

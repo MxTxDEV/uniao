@@ -50,7 +50,7 @@ export function ProductsClient({ products }: { products: ProductDTO[] }) {
     <div>
       <PageHeader
         title="Produtos"
-        description="Cadastro opcional — serve só para agilizar a venda. Sem estoque, sem custo."
+        description="Cadastro opcional para agilizar a venda. O estoque sobe nas entradas (menu Estoque) e desce nas vendas."
         actions={
           <Button onClick={() => setEditing("new")}>
             <Plus className="h-4 w-4" /> Novo produto
@@ -78,6 +78,7 @@ export function ProductsClient({ products }: { products: ProductDTO[] }) {
                 <th className="px-5 py-3 font-semibold">Produto</th>
                 <th className="hidden px-3 py-3 font-semibold sm:table-cell">Categoria</th>
                 <th className="px-3 py-3 text-right font-semibold">Preço</th>
+                <th className="px-3 py-3 text-right font-semibold">Estoque</th>
                 <th className="px-3 py-3 font-semibold">Status</th>
                 <th className="px-5 py-3 text-right font-semibold">Ações</th>
               </tr>
@@ -92,6 +93,7 @@ export function ProductsClient({ products }: { products: ProductDTO[] }) {
                   </td>
                   <td className="hidden px-3 py-3.5 text-muted-foreground sm:table-cell">{p.category}</td>
                   <td className="tabular px-3 py-3.5 text-right font-semibold">{formatBRL(p.price)}</td>
+                  <td className={`tabular px-3 py-3.5 text-right font-semibold ${p.stock <= 0 ? "text-danger" : ""}`}>{p.stock}</td>
                   <td className="px-3 py-3.5">
                     <div className="flex items-center gap-2">
                       <Switch checked={p.active} disabled={pendingId === p.id} onCheckedChange={(v) => toggle(p, v)} aria-label={`${p.active ? "Desativar" : "Ativar"} ${p.name}`} />

@@ -5,6 +5,7 @@ import { requireCtx } from "@/server/auth";
 import { createProduct, setProductActive, updateProduct } from "@/server/products";
 import { createUser, updateUser, changeOwnPassword } from "@/server/users";
 import { updateSettings } from "@/server/settings";
+import { createStockEntry } from "@/server/stock";
 import { addMovement, closeRegister, openRegister } from "@/server/cash";
 
 export async function saveProductAction(id: string | null, input: unknown) {
@@ -72,6 +73,18 @@ export async function closeCashAction(input: unknown) {
     const r = await closeRegister(ctx, input);
     revalidatePath("/caixa");
     revalidatePath("/dashboard");
+    return r;
+  });
+}
+
+export async function stockEntryAction(input: unknown) {
+  return run(async () => {
+    const ctx = await requireCtx();
+    const r = await createStockEntry(ctx, input);
+    revalidatePath("/estoque");
+    revalidatePath("/produtos");
+    revalidatePath("/nova-venda");
+    revalidatePath("/relatorios");
     return r;
   });
 }

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BarChart3, LayoutDashboard, LogOut, Menu, Package, Receipt, Settings, ShoppingBag, UserRound, Wallet } from "lucide-react";
+import { BarChart3, Boxes, LayoutDashboard, LogOut, Menu, Package, Receipt, Settings, ShoppingBag, UserRound, Wallet } from "lucide-react";
 import { cn, ROLE_LABEL } from "@/lib/utils";
 import { logoutAction } from "@/actions/auth";
 import { BrandMark, BrandName } from "./brand";
@@ -22,6 +22,7 @@ const NAV: NavItem[] = [
   { href: "/nova-venda", label: "Nova Venda", icon: ShoppingBag, hint: "F2" },
   { href: "/vendas", label: "Vendas", icon: Receipt },
   { href: "/produtos", label: "Produtos", icon: Package, admin: true },
+  { href: "/estoque", label: "Estoque", icon: Boxes, admin: true },
   { href: "/caixa", label: "Caixa", icon: Wallet, admin: true },
   { href: "/funcionarios", label: "Funcionários", icon: UserRound, admin: true },
   { href: "/relatorios", label: "Relatórios", icon: BarChart3, admin: true },

@@ -264,7 +264,10 @@ export function PosScreen({ products, sellers, currentUserId, canPickSeller, set
                           <p className="mt-1 line-clamp-2 font-semibold leading-snug">{p.name}</p>
                         </div>
                         <div className="mt-3 flex items-end justify-between">
-                          <p className="tabular text-lg font-bold">{formatBRL(p.price)}</p>
+                          <div>
+                            <p className="tabular text-lg font-bold">{formatBRL(p.price)}</p>
+                            <p className={cn("tabular text-[11px]", p.stock <= 0 ? "font-semibold text-danger" : "text-muted-foreground")}>Estoque: {p.stock}</p>
+                          </div>
                           {inCart > 0 ? (
                             <span className="tabular flex h-7 min-w-7 items-center justify-center rounded-full bg-primary px-2 text-xs font-bold text-primary-foreground">{inCart}</span>
                           ) : (

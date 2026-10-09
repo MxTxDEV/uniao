@@ -69,6 +69,11 @@ export default async function RelatoriosPage({ searchParams }: { searchParams: P
         <Stat label="Canceladas" value={r.canceledCount} hint={r.canceledCount ? `${formatBRL(r.canceledTotal)} fora do faturamento` : undefined} />
       </section>
 
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Despesas">
+        <Stat label="Despesas" value={formatBRL(r.expensesTotal)} hint={`${r.expensesCount} lançamento${r.expensesCount === 1 ? "" : "s"} (entradas de estoque)`} />
+        <Stat label="Faturamento − despesas" value={formatBRL(r.result)} hint="resultado do período" />
+      </section>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <section>
           <SectionTitle>Vendas por vendedor</SectionTitle>

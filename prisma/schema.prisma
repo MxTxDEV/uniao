@@ -56,6 +56,8 @@ model Tenant {
   sales         Sale[]
   cashRegisters CashRegister[]
   auditLogs     AuditLog[]
+  stockEntries  StockEntry[]
+  expenses      Expense[]
 }
 
 model User {
@@ -84,11 +86,14 @@ model Product {
   sku       String?
   imageUrl  String?
   active    Boolean  @default(true)
+  // Quantidade em estoque: sobe nas entradas de estoque e desce nas vendas (pode ficar negativa; nunca bloqueia a venda).
+  stock     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenant Tenant     @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  items  SaleItem[]
+  tenant     Tenant           @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  items      SaleItem[]
+  stockItems StockEntryItem[]
 
   @@index([tenantId, active])
 }
@@ -196,4 +201,49 @@ model AuditLog {
 
   @@index([tenantId, createdAt])
   @@index([action, createdAt])
+}
+
+// Entrada de estoque: soma a quantidade dos produtos e gera uma despesa com o valor total.
+model StockEntry {
+  id          String   @id @default(cuid())
+  tenantId    String
+  totalCost   Decimal  @db.Decimal(12, 2)
+  notes       String?
+  createdById String
+  createdAt   DateTime @default(now())
+
+  tenant  Tenant           @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  items   StockEntryItem[]
+  expense Expense?
+
+  @@index([tenantId, createdAt])
+}
+
+model StockEntryItem {
+  id           String @id @default(cuid())
+  tenantId     String
+  stockEntryId String
+  productId    String
+  quantity     Int
+
+  stockEntry StockEntry @relation(fields: [stockEntryId], references: [id], onDelete: Restrict)
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([stockEntryId])
+  @@index([tenantId])
+}
+
+model Expense {
+  id           String   @id @default(cuid())
+  tenantId     String
+  description  String
+  amount       Decimal  @db.Decimal(12, 2)
+  stockEntryId String?  @unique
+  createdById  String
+  createdAt    DateTime @default(now())
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  stockEntry StockEntry? @relation(fields: [stockEntryId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, createdAt])
 }
