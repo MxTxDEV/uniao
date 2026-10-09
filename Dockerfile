@@ -13,5 +13,5 @@ RUN npm run build
 
 ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
 EXPOSE 3000
-# Ao subir: aplica migrations; se RUN_SEED=true cria os dados de demonstração (só se o banco estiver vazio).
-CMD ["sh", "-c", "npx prisma migrate deploy && if [ \"$RUN_SEED\" = \"true\" ]; then npm run db:seed; fi && exec npm start"]
+# Ao subir: valida variáveis, aplica migrations e (se RUN_SEED=true) cria dados de demonstração se o banco estiver vazio.
+CMD ["sh", "./docker-entrypoint.sh"]
