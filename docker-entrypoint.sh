@@ -7,7 +7,11 @@ clean() {
 }
 DATABASE_URL=$(clean "$DATABASE_URL")
 DIRECT_URL=$(clean "$DIRECT_URL")
-[ -z "$DIRECT_URL" ] && DIRECT_URL="$DATABASE_URL"
+case "$DIRECT_URL" in
+  postgresql://*|postgres://*) ;;
+  *) [ -n "$DIRECT_URL" ] && echo "[aviso] DIRECT_URL inválida (não é URL de banco); usando DATABASE_URL no lugar."
+     DIRECT_URL="$DATABASE_URL" ;;
+esac
 export DATABASE_URL DIRECT_URL
 
 check() {
