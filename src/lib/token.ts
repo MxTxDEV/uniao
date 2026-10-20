@@ -4,7 +4,10 @@ export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 dias
 
 export interface TokenPayload {
   uid: string;
-  tid: string;
+  /** Empresa do usuário. Para super admin: empresa onde ele está "entrado" (ausente = painel da plataforma). */
+  tid?: string;
+  /** true = uid é um SuperAdmin (não um User de empresa). */
+  sa?: boolean;
 }
 
 const enc = new TextEncoder();
@@ -37,7 +40,7 @@ async function hmacKey(usage: "sign" | "verify"): Promise<CryptoKey> {
 export async function signToken(p: TokenPayload): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const header = b64url(enc.encode(JSON.stringify({ alg: "HS256", typ: "JWT" })));
-  const body = b64url(enc.encode(JSON.stringify({ sub: p.uid, tid: p.tid, iat: now, exp: now + SESSION_MAX_AGE })));
+  const body = b64url(enc.encode(JSON.stringify({ sub: p.uid, ...(p.tid ? { tid: p.tid } : {}), ...(p.sa ? { sa: true } : {}), iat: now, exp: now + SESSION_MAX_AGE })));
   const sig = await crypto.subtle.sign("HMAC", await hmacKey("sign"), enc.encode(`${header}.${body}`));
   return `${header}.${body}.${b64url(sig)}`;
 }
@@ -54,9 +57,13 @@ export async function verifyToken(token: string | undefined): Promise<TokenPaylo
     const ok = await crypto.subtle.verify("HMAC", await hmacKey("verify"), fromB64url(sig), enc.encode(`${header}.${body}`));
     if (!ok) return null;
     const p = JSON.parse(new TextDecoder().decode(fromB64url(body)));
-    if (typeof p.sub !== "string" || typeof p.tid !== "string" || typeof p.exp !== "number") return null;
+    if (typeof p.sub !== "string" || typeof p.exp !== "number") return null;
+    if (p.tid !== undefined && typeof p.tid !== "string") return null;
+    const sa = p.sa === true;
+    // Usuário de empresa SEMPRE precisa de tid; super admin pode não ter (painel da plataforma).
+    if (!sa && !p.tid) return null;
     if (p.exp < Math.floor(Date.now() / 1000)) return null;
-    return { uid: p.sub, tid: p.tid };
+    return { uid: p.sub, ...(p.tid ? { tid: p.tid } : {}), ...(sa ? { sa: true } : {}) };
   } catch {
     return null;
   }

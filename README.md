@@ -30,6 +30,19 @@ npm test && npm run lint && npm run typecheck
 | Admin | admin@uniaogrifes.com.br |
 | Vendedor | joao@uniaogrifes.com.br · maria@… · pedro@… |
 
+## Multiempresa e super admin
+- Cada empresa (tenant) tem seus próprios usuários, produtos, vendas, caixa, estoque e despesas, totalmente isolados.
+- **Super admin** é um perfil da plataforma (fora de qualquer empresa) em `/super`: cadastra/edita/suspende **empresas**, gerencia **usuários de todas as empresas**, gerencia outros **super admins**, vê a **atividade** (auditoria) e pode **entrar em qualquer empresa** (faixa dourada "Modo super admin"; age como administrador e tudo fica registrado no log).
+- Empresa **suspensa**: ninguém da empresa consegue entrar (sessões ativas caem na hora); os dados são mantidos.
+- E-mail é único no sistema inteiro (usuários de empresas e super admins).
+- A empresa já existente (União Grifes) continua como está; a migration só acrescenta colunas/tabelas.
+
+### Criar o primeiro super admin
+```bash
+SUPERADMIN_EMAIL=voce@email.com SUPERADMIN_PASSWORD='senha-forte' SUPERADMIN_NAME="Seu Nome" npm run superadmin:create
+```
+No Docker/Coolify basta definir `SUPERADMIN_EMAIL` e `SUPERADMIN_PASSWORD` (e opcionalmente `SUPERADMIN_NAME`): o container cria o super admin ao subir (idempotente; para redefinir a senha use `SUPERADMIN_RESET_PASSWORD=true` uma vez). Em desenvolvimento o seed cria `super@uniao.dev` / `uniao123`.
+
 ## Deploy com Docker (Coolify, etc.)
 O `Dockerfile` faz o build e, ao iniciar, roda `prisma migrate deploy`. Configure: Build Pack **Dockerfile**, porta **3000**, variáveis `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`. Com `RUN_SEED=true` o container também cria os dados de demonstração (apenas se o banco estiver vazio; login `admin@uniaogrifes.com.br` / `uniao123`).
 

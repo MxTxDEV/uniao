@@ -5,6 +5,7 @@ import { AppError } from "@/lib/errors";
 import { Decimal, dec, parseMoney } from "@/lib/money";
 import { moneyStr, optionalText, parse, text } from "@/lib/validate";
 import { audit } from "./audit";
+import { resolveNames } from "./identity";
 import { assertAdmin, type Ctx } from "./context";
 
 type Tx = Prisma.TransactionClient | typeof db;
@@ -46,8 +47,8 @@ export async function getOpenRegister(ctx: Ctx): Promise<CashSummary | null> {
   assertAdmin(ctx);
   const reg = await db.cashRegister.findFirst({ where: { tenantId: ctx.tenantId, status: "OPEN" } });
   if (!reg) return null;
-  const opener = await db.user.findFirst({ where: { id: reg.openedById, tenantId: ctx.tenantId }, select: { name: true } });
-  return { ...(await summarize(db, ctx.tenantId, reg)), openedByName: opener?.name ?? "—" };
+  const names = await resolveNames(ctx.tenantId, [reg.openedById]);
+  return { ...(await summarize(db, ctx.tenantId, reg)), openedByName: names.get(reg.openedById) ?? "—" };
 }
 
 export async function listMovements(ctx: Ctx, registerId: string) {
@@ -58,9 +59,7 @@ export async function listMovements(ctx: Ctx, registerId: string) {
 export async function listClosedRegisters(ctx: Ctx, take = 10) {
   assertAdmin(ctx);
   const rows = await db.cashRegister.findMany({ where: { tenantId: ctx.tenantId, status: "CLOSED" }, orderBy: { closedAt: "desc" }, take });
-  const ids = [...new Set(rows.map((r) => r.closedById).filter((x): x is string => !!x))];
-  const users = await db.user.findMany({ where: { tenantId: ctx.tenantId, id: { in: ids } }, select: { id: true, name: true } });
-  const names = new Map(users.map((u) => [u.id, u.name]));
+  const names = await resolveNames(ctx.tenantId, rows.map((r) => r.closedById));
   return rows.map((r) => ({ ...r, closedByName: r.closedById ? names.get(r.closedById) ?? "—" : "—" }));
 }
 

@@ -2,9 +2,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BarChart3, Boxes, LayoutDashboard, LogOut, Menu, Package, Receipt, Settings, ShoppingBag, UserRound, Wallet } from "lucide-react";
+import { ArrowLeft, BarChart3, Boxes, LayoutDashboard, LogOut, Menu, ShieldCheck, Package, Receipt, Settings, ShoppingBag, UserRound, Wallet } from "lucide-react";
 import { cn, ROLE_LABEL } from "@/lib/utils";
 import { logoutAction } from "@/actions/auth";
+import { exitTenantAction } from "@/actions/platform";
 import { BrandMark, BrandName } from "./brand";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/misc";
@@ -30,7 +31,7 @@ const NAV: NavItem[] = [
 ];
 
 interface Props {
-  user: { name: string; role: "ADMIN" | "VENDEDOR"; tenantName: string };
+  user: { name: string; role: "ADMIN" | "VENDEDOR"; tenantName: string; isSuper?: boolean };
   children: React.ReactNode;
 }
 
@@ -62,9 +63,17 @@ export function AppShell({ user, children }: Props) {
   const mobileRest = items.filter((i) => !mobilePrimary.includes(i));
 
   return (
-    <div className="min-h-dvh">
+    <div className="min-h-dvh" style={{ "--banner": user.isSuper ? "2.5rem" : "0px" } as React.CSSProperties}>
+      {user.isSuper && (
+        <div className="no-print fixed inset-x-0 top-0 z-50 flex h-10 items-center justify-between gap-3 bg-accent px-4 text-sm font-semibold text-white">
+          <span className="flex min-w-0 items-center gap-2"><ShieldCheck className="h-4 w-4 shrink-0" /><span className="truncate">Modo super admin · {user.tenantName}</span></span>
+          <form action={exitTenantAction}>
+            <button type="submit" className="flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-1 text-xs font-bold transition hover:bg-white/25"><ArrowLeft className="h-3.5 w-3.5" /> Voltar ao painel</button>
+          </form>
+        </div>
+      )}
       {/* Sidebar: compacta no tablet (md), completa no desktop (lg) */}
-      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-[76px] flex-col border-r border-border bg-card md:flex lg:w-64">
+      <aside className="no-print fixed bottom-0 left-0 top-[var(--banner)] z-30 hidden w-[76px] flex-col border-r border-border bg-card md:flex lg:w-64">
         <div className="flex h-[72px] items-center gap-3 px-5 max-lg:justify-center max-lg:px-0">
           <BrandMark />
           <div className="hidden min-w-0 lg:block">
@@ -102,7 +111,7 @@ export function AppShell({ user, children }: Props) {
             </div>
             <div className="hidden min-w-0 flex-1 lg:block">
               <p className="truncate text-sm font-semibold">{user.name}</p>
-              <p className="text-xs text-muted-foreground">{ROLE_LABEL[user.role]}</p>
+              <p className="text-xs text-muted-foreground">{user.isSuper ? "Super admin" : ROLE_LABEL[user.role]}</p>
             </div>
             <form action={logoutAction} className="max-lg:hidden">
               <button type="submit" className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground" title="Sair" aria-label="Sair">
@@ -119,7 +128,7 @@ export function AppShell({ user, children }: Props) {
       </aside>
 
       {/* Topo mobile */}
-      <header className="no-print sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-card/90 px-4 backdrop-blur md:hidden">
+      <header className="no-print sticky top-[var(--banner)] z-20 flex h-14 items-center justify-between border-b border-border bg-card/90 px-4 backdrop-blur md:hidden">
         <div className="flex items-center gap-2.5">
           <BrandMark className="h-8 w-8 rounded-lg" />
           <BrandName name={user.tenantName} className="text-[0.8rem]" />
@@ -127,7 +136,7 @@ export function AppShell({ user, children }: Props) {
         <span className="text-xs font-semibold text-muted-foreground">{user.name}</span>
       </header>
 
-      <main className="md:pl-[76px] lg:pl-64">
+      <main className="pt-[var(--banner)] md:pl-[76px] lg:pl-64">
         <div className="mx-auto w-full max-w-[1400px] px-4 pb-28 pt-5 sm:px-6 md:pb-10 md:pt-8 lg:px-10">{children}</div>
       </main>
 

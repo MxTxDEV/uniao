@@ -7,10 +7,9 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const payload = await verifyToken(req.cookies.get(SESSION_COOKIE)?.value);
 
-  if (pathname === "/login") {
-    if (payload) return NextResponse.redirect(new URL("/", req.url));
-    return NextResponse.next();
-  }
+  // /login nunca redireciona aqui: um cookie assinado pode estar "válido" mas o usuário/empresa já ter sido
+  // desativado/suspenso (só o banco sabe). Quem decide é a própria página de login, consultando o banco.
+  if (pathname === "/login") return NextResponse.next();
   if (!payload) {
     if (pathname.startsWith("/api/")) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     const url = new URL("/login", req.url);

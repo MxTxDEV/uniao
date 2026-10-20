@@ -46,7 +46,9 @@ export function PosScreen({ products, sellers, currentUserId, canPickSeller, set
   const [cart, setCart] = useState<Line[]>([]);
   const [discount, setDiscount] = useState("0.00");
   const [payment, setPayment] = useState<PaymentKey | null>(null);
-  const [sellerId, setSellerId] = useState(currentUserId);
+  // Super admin dentro da empresa não é um vendedor: começa no primeiro vendedor da lista.
+  const defaultSeller = sellers.some((x) => x.id === currentUserId) ? currentUserId : (sellers[0]?.id ?? "");
+  const [sellerId, setSellerId] = useState(defaultSeller);
   const [submitting, setSubmitting] = useState(false);
   const [receipt, setReceipt] = useState<SaleReceipt | null>(null);
   const [avulsaOpen, setAvulsaOpen] = useState(false);
@@ -82,12 +84,12 @@ export function PosScreen({ products, sellers, currentUserId, canPickSeller, set
     setCart([]);
     setDiscount("0.00");
     setPayment(null);
-    setSellerId(currentUserId);
+    setSellerId(defaultSeller);
     setQuery("");
     setReceipt(null);
     requestId.current = uid();
     setTimeout(() => searchRef.current?.focus(), 50);
-  }, [currentUserId]);
+  }, [defaultSeller]);
 
   // ---- atalhos ----
   useEffect(() => {

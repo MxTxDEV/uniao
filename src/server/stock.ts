@@ -4,6 +4,7 @@ import { AppError } from "@/lib/errors";
 import { dec, parseMoney } from "@/lib/money";
 import { moneyStr, optionalText, parse } from "@/lib/validate";
 import { audit } from "./audit";
+import { resolveNames } from "./identity";
 import { assertAdmin, type Ctx } from "./context";
 
 const entrySchema = z.object({
@@ -79,9 +80,7 @@ export async function listStockEntries(ctx: Ctx, take = 30) {
     take,
     include: { items: { include: { product: { select: { name: true } } } } },
   });
-  const ids = [...new Set(rows.map((r) => r.createdById))];
-  const users = await db.user.findMany({ where: { tenantId: ctx.tenantId, id: { in: ids } }, select: { id: true, name: true } });
-  const names = new Map(users.map((u) => [u.id, u.name]));
+  const names = await resolveNames(ctx.tenantId, rows.map((r) => r.createdById));
   return rows.map((r) => ({
     id: r.id,
     createdAt: r.createdAt.toISOString(),

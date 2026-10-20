@@ -47,6 +47,10 @@ model Tenant {
   allowDiscount    Boolean  @default(true)
   allowCustomItems Boolean  @default(true)
   allowCancel      Boolean  @default(true)
+  // Empresa suspensa: usuários não conseguem entrar (só o super admin acessa).
+  active           Boolean  @default(true)
+  // Anotações internas visíveis apenas ao super admin.
+  internalNotes    String?
   // Contador sequencial das vendas (#000123). Incrementado atomicamente na transação da venda.
   saleCounter      Int      @default(0)
   createdAt        DateTime @default(now())
@@ -246,4 +250,14 @@ model Expense {
   stockEntry StockEntry? @relation(fields: [stockEntryId], references: [id], onDelete: Restrict)
 
   @@index([tenantId, createdAt])
+}
+
+// Administrador da plataforma (fora de qualquer empresa). Gerencia empresas, usuários e pode entrar em qualquer empresa.
+model SuperAdmin {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
 }

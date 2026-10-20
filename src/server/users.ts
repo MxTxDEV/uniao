@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { AppError } from "@/lib/errors";
 import { parse, text } from "@/lib/validate";
 import { audit } from "./audit";
+import { assertEmailFree } from "./identity";
 import { assertAdmin, type Ctx } from "./context";
 
 export interface UserDTO {
@@ -48,6 +49,7 @@ const updateSchema = z.object({
 export async function createUser(ctx: Ctx, input: unknown): Promise<UserDTO> {
   assertAdmin(ctx);
   const d = parse(createSchema, input);
+  await assertEmailFree(d.email);
   try {
     const u = await db.user.create({
       data: { tenantId: ctx.tenantId, name: d.name, email: d.email, role: d.role, passwordHash: await bcrypt.hash(d.password, 12) },
@@ -104,6 +106,7 @@ const changePwSchema = z.object({
 });
 
 export async function changeOwnPassword(ctx: Ctx, input: unknown): Promise<void> {
+  if (ctx.superAdminId) throw new AppError("RULE", "Super admin altera a própria senha no painel da plataforma (Super admins).");
   const d = parse(changePwSchema, input);
   const u = await db.user.findFirstOrThrow({ where: { id: ctx.userId, tenantId: ctx.tenantId } });
   if (!(await bcrypt.compare(d.current, u.passwordHash))) throw new AppError("VALIDATION", "Senha atual incorreta.");

@@ -4,7 +4,7 @@ import type { Ctx } from "@/server/context";
 
 export async function resetDb() {
   await db.$executeRawUnsafe(
-    `TRUNCATE "AuditLog","CashMovement","SaleItem","Sale","CashRegister","Product","User","Tenant" RESTART IDENTITY CASCADE`,
+    `TRUNCATE "AuditLog","CashMovement","SaleItem","Sale","CashRegister","Product","User","SuperAdmin","Tenant" RESTART IDENTITY CASCADE`,
   );
 }
 
@@ -37,4 +37,9 @@ export const rid = () => `req-${Date.now()}-${++reqSeq}-xxxxxxxx`;
 
 export function saleInput(items: unknown[], extra: Record<string, unknown> = {}) {
   return { requestId: rid(), paymentMethod: "PIX", discount: "0", items, ...extra };
+}
+
+export async function makeSuper(name = "Super", email?: string) {
+  const sa = await db.superAdmin.create({ data: { name, email: email ?? `${name.toLowerCase()}${++seq}@plataforma.com`, passwordHash: hash } });
+  return { sa, sc: { superAdminId: sa.id } };
 }

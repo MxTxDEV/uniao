@@ -98,7 +98,7 @@ describe("login", () => {
     const t = await makeTenant();
     const email = t.admin.email;
     const ok = await authenticate({ email: email.toUpperCase(), password: "senha1234" });
-    expect(ok).toEqual({ userId: t.admin.id, tenantId: t.tenant.id });
+    expect(ok).toEqual({ kind: "tenant", userId: t.admin.id, tenantId: t.tenant.id });
     await expect(authenticate({ email, password: "errada" })).rejects.toThrow("E-mail ou senha incorretos.");
     await expect(authenticate({ email: "naoexiste@x.com", password: "errada" })).rejects.toThrow("E-mail ou senha incorretos.");
     await db.user.update({ where: { id: t.seller1.id }, data: { active: false } });

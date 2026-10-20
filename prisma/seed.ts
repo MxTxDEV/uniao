@@ -26,6 +26,12 @@ async function main() {
   }
   const passwordHash = await bcrypt.hash("uniao123", 10);
 
+  if (process.env.NODE_ENV !== "production") {
+    // Apenas desenvolvimento. Em produção crie com: npm run superadmin:create
+    await db.superAdmin.create({ data: { name: "Super Admin", email: "super@uniao.dev", passwordHash } });
+    console.log("Super admin de desenvolvimento: super@uniao.dev / uniao123");
+  }
+
   const tenant = await db.tenant.create({
     data: { name: "União Grifes", address: "Rua das Flores, 120 - Centro", phone: "(11) 99999-0000", instagram: "@uniaogrifes" },
   });

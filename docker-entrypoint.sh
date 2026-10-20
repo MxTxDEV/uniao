@@ -29,5 +29,10 @@ check DIRECT_URL "$DIRECT_URL"
 if [ "$BAD" = "1" ]; then sleep 30; exit 1; fi
 
 npx prisma migrate deploy || exit 1
+
+# Super admin inicial: defina SUPERADMIN_EMAIL e SUPERADMIN_PASSWORD (idempotente; não sobrescreve senha sem SUPERADMIN_RESET_PASSWORD=true).
+if [ -n "$SUPERADMIN_EMAIL" ] && [ -n "$SUPERADMIN_PASSWORD" ]; then
+  npx tsx prisma/create-superadmin.ts || echo "[aviso] não foi possível criar o super admin (veja a mensagem acima)."
+fi
 if [ "$RUN_SEED" = "true" ]; then npm run db:seed; fi
 exec npm start

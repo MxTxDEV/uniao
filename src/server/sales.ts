@@ -7,6 +7,7 @@ import { AppError } from "@/lib/errors";
 import { Decimal, dec, parseMoney } from "@/lib/money";
 import { moneyStr, optionalText, paymentEnum, parse } from "@/lib/validate";
 import { audit } from "./audit";
+import { resolveNames } from "./identity";
 import { assertAdmin, isAdmin, type Ctx } from "./context";
 
 const itemSchema = z.object({
@@ -79,6 +80,7 @@ export async function createSale(ctx: Ctx, input: unknown): Promise<SaleReceipt>
   const tenant = await db.tenant.findUniqueOrThrow({ where: { id: ctx.tenantId } });
 
   // Vendedor: só vende em seu próprio nome. Admin: escolhe qualquer vendedor ativo da loja.
+  if (ctx.superAdminId && !data.sellerId) throw new AppError("VALIDATION", "Escolha o vendedor da venda.");
   let sellerId = ctx.userId;
   if (data.sellerId && data.sellerId !== ctx.userId) {
     if (!isAdmin(ctx)) throw new AppError("FORBIDDEN", "Você só pode registrar vendas em seu nome.");
@@ -225,13 +227,8 @@ export async function getSale(ctx: Ctx, id: string) {
     },
   });
   if (!sale) throw new AppError("NOT_FOUND", "Venda não encontrada.");
-  const [createdBy, canceledBy] = await Promise.all([
-    db.user.findFirst({ where: { id: sale.createdById, tenantId: ctx.tenantId }, select: { name: true } }),
-    sale.canceledById
-      ? db.user.findFirst({ where: { id: sale.canceledById, tenantId: ctx.tenantId }, select: { name: true } })
-      : null,
-  ]);
-  return { sale, createdByName: createdBy?.name ?? "—", canceledByName: canceledBy?.name ?? null };
+  const names = await resolveNames(ctx.tenantId, [sale.createdById, sale.canceledById]);
+  return { sale, createdByName: names.get(sale.createdById) ?? "—", canceledByName: sale.canceledById ? names.get(sale.canceledById) ?? null : null };
 }
 
 const cancelSchema = z.object({ id: z.string().min(1).max(40), reason: optionalText(300, "Motivo") });

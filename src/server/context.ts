@@ -10,6 +10,8 @@ export interface Ctx {
   userId: string;
   role: Role;
   name: string;
+  /** Preenchido quando um super admin está operando dentro da empresa (userId = id do SuperAdmin). */
+  superAdminId?: string;
 }
 
 export function assertAdmin(ctx: Ctx): void {
