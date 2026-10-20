@@ -8,6 +8,7 @@ import {
   createSuperAdmin,
   createTenant,
   createTenantUser,
+  deleteSuperAdmin,
   enterTenant,
   getTenantDetail,
   listActivity,
@@ -164,6 +165,23 @@ describe("super admins", () => {
     const { sa } = await makeSuper();
     await expect(authenticate({ email: sa.email, password: "errada" })).rejects.toThrow("E-mail ou senha incorretos.");
     expect(await db.auditLog.count({ where: { action: "LOGIN_FAILED", entityId: sa.email } })).toBe(1);
+  });
+});
+
+describe("apagar super admin", () => {
+  it("apaga outro super admin; não apaga a si mesmo; não existente falha; sem permissão falha; fica auditado", async () => {
+    const { sa, sc } = await makeSuper("Novo");
+    const padrao = await makeSuper("Padrao");
+    await expect(deleteSuperAdmin(sc, sa.id)).rejects.toThrow(/a si mesmo/);
+    await expect(deleteSuperAdmin(sc, "nao-existe")).rejects.toThrow(/não encontrado/);
+    await expect(deleteSuperAdmin({ superAdminId: "falso" }, padrao.sa.id)).rejects.toThrow(/super admin/i);
+    expect(await db.superAdmin.count()).toBe(2);
+    await deleteSuperAdmin(sc, padrao.sa.id);
+    expect(await db.superAdmin.count()).toBe(1);
+    expect(await db.auditLog.count({ where: { action: "SUPER_ADMIN_DELETE", entityId: padrao.sa.id } })).toBe(1);
+    // quem foi apagado perde o acesso imediatamente e não consegue mais entrar
+    await expect(listTenants(padrao.sc)).rejects.toThrow(/super admin/i);
+    await expect(authenticate({ email: padrao.sa.email, password: "senha1234" })).rejects.toThrow("E-mail ou senha incorretos.");
   });
 });
 

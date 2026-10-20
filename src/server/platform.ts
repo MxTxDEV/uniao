@@ -252,6 +252,19 @@ export async function updateSuperAdmin(sc: SuperCtx, id: string, input: unknown)
   return toSA(updated);
 }
 
+/** Apaga definitivamente um super admin (não é possível apagar a si mesmo nem o último). */
+export async function deleteSuperAdmin(sc: SuperCtx, id: string): Promise<void> {
+  const sa = await requireSuper(sc);
+  if (id === sa.id) throw new AppError("RULE", "Você não pode apagar a si mesmo. Entre com outro super admin para apagar esta conta.");
+  const target = await db.superAdmin.findUnique({ where: { id } });
+  if (!target) throw new AppError("NOT_FOUND", "Super admin não encontrado.");
+  // quem está agindo é ativo e diferente do alvo, logo sempre sobra ao menos um ativo; checagem explícita por segurança
+  const remaining = await db.superAdmin.count({ where: { active: true, id: { not: id } } });
+  if (remaining < 1) throw new AppError("RULE", "A plataforma precisa de ao menos um super admin ativo.");
+  await db.superAdmin.delete({ where: { id } });
+  await audit({ tenantId: null, userId: sa.id, action: "SUPER_ADMIN_DELETE", entity: "SuperAdmin", entityId: id, meta: { email: target.email } });
+}
+
 const ownPwSchema = z.object({
   current: z.string({ message: "Informe a senha atual." }).min(1, "Informe a senha atual.").max(100),
   next: passwordSchema,

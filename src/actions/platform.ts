@@ -9,6 +9,7 @@ import {
   createSuperAdmin,
   createTenant,
   createTenantUser,
+  deleteSuperAdmin,
   enterTenant,
   updateSuperAdmin,
   updateTenant,
@@ -91,5 +92,13 @@ export async function changeSuperPasswordAction(input: unknown) {
   return run(async () => {
     const sc = await requireSuperCtx();
     await changeOwnSuperPassword(sc, input);
+  });
+}
+
+export async function deleteSuperAdminAction(id: string) {
+  return run(async () => {
+    const sc = await requireSuperCtx();
+    await deleteSuperAdmin(sc, id);
+    refresh();
   });
 }

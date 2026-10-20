@@ -2,8 +2,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Pencil, Plus } from "lucide-react";
-import { changeSuperPasswordAction, createSuperAdminAction, updateSuperAdminAction } from "@/actions/platform";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { changeSuperPasswordAction, createSuperAdminAction, deleteSuperAdminAction, updateSuperAdminAction } from "@/actions/platform";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, SectionTitle } from "@/components/ui/card";
@@ -57,7 +57,29 @@ function AdminDialog({ editing, currentId, onClose, onSaved }: { editing: SuperA
     else if (editing) setForm({ name: editing.name, email: editing.email, password: "", active: editing.active });
   }
   const isNew = editing === "new";
-  const self = !isNew && editing !== null && editing.id === currentId;
+  const target = editing !== null && editing !== "new" ? editing : null;
+  const self = target !== null && target.id === currentId;
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [lastKey, setLastKey] = useState<string | null>(null);
+  if (lastKey !== key) {
+    setLastKey(key);
+    setConfirmDelete(false);
+  }
+
+  const remove = () => {
+    if (!target) return;
+    setError("");
+    start(async () => {
+      const r = await deleteSuperAdminAction(target.id);
+      if (!r.ok) {
+        setError(r.error);
+        setConfirmDelete(false);
+        return;
+      }
+      toast.success("Super admin apagado.");
+      onSaved();
+    });
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,6 +115,21 @@ function AdminDialog({ editing, currentId, onClose, onSaved }: { editing: SuperA
             <Button type="button" variant="secondary" className="flex-1" onClick={onClose} disabled={pending}>Cancelar</Button>
             <Button type="submit" className="flex-1" loading={pending}>Salvar</Button>
           </div>
+          {target && !self && (
+            <div className="border-t border-border pt-4">
+              {!confirmDelete ? (
+                <Button type="button" variant="danger-ghost" className="w-full" onClick={() => setConfirmDelete(true)} disabled={pending}><Trash2 className="h-4 w-4" /> Apagar este super admin</Button>
+              ) : (
+                <div className="space-y-2 rounded-xl bg-danger-soft p-3">
+                  <p className="text-sm font-medium text-danger">Apagar definitivamente <b>{target.email}</b>? Não dá para desfazer.</p>
+                  <div className="flex gap-2">
+                    <Button type="button" variant="secondary" size="sm" className="flex-1" onClick={() => setConfirmDelete(false)} disabled={pending}>Voltar</Button>
+                    <Button type="button" variant="danger" size="sm" className="flex-1" loading={pending} onClick={remove}>Sim, apagar</Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </form>
       </DialogContent>
     </Dialog>

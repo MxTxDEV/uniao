@@ -16,6 +16,7 @@ const LABEL: Record<string, string> = {
   SUPER_ENTER_TENANT: "Super admin entrou na empresa",
   SUPER_ADMIN_CREATE: "Super admin criado",
   SUPER_ADMIN_UPDATE: "Super admin alterado",
+  SUPER_ADMIN_DELETE: "Super admin apagado",
   SUPER_PASSWORD_CHANGE: "Senha de super admin alterada",
   PLATFORM_TENANT_CREATE: "Empresa criada",
   PLATFORM_TENANT_UPDATE: "Empresa alterada",

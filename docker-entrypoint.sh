@@ -30,7 +30,10 @@ if [ "$BAD" = "1" ]; then sleep 30; exit 1; fi
 
 npx prisma migrate deploy || exit 1
 
-# Super admin inicial: defina SUPERADMIN_EMAIL e SUPERADMIN_PASSWORD (idempotente; não sobrescreve senha sem SUPERADMIN_RESET_PASSWORD=true).
+# Super admin padrão (só se não existir nenhum). Não precisa de variável de ambiente.
+npx tsx prisma/bootstrap-superadmin.ts || echo "[aviso] não foi possível criar o super admin padrão (veja acima)."
+
+# Opcional: super admin inicial pelo ambiente: defina SUPERADMIN_EMAIL e SUPERADMIN_PASSWORD (idempotente; não sobrescreve senha sem SUPERADMIN_RESET_PASSWORD=true).
 if [ -n "$SUPERADMIN_EMAIL" ] && [ -n "$SUPERADMIN_PASSWORD" ]; then
   npx tsx prisma/create-superadmin.ts || echo "[aviso] não foi possível criar o super admin (veja a mensagem acima)."
 fi
